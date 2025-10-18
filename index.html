@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant POS</title>
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1077/1077035.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            touch-action: manipulation;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        .app-header h1 {
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+        
+        .content {
+            margin-top: 80px;
+            padding: 15px;
+            padding-bottom: 100px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 8px;
+        }
+        
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .table-btn {
+            background: white;
+            border: 2px solid #4CAF50;
+            color: #4CAF50;
+            padding: 20px 10px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 60px;
+        }
+        
+        .table-btn.active {
+            background: #4CAF50;
+            color: white;
+            transform: scale(0.95);
+        }
+        
+        .table-btn:active {
+            transform: scale(0.92);
+        }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .menu-item {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 10px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .menu-item:active {
+            transform: scale(0.95);
+        }
+        
+        .item-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .item-price {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cart-total {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #4CAF50;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8fff8;
+            border-radius: 10px;
+            border: 2px solid #4CAF50;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #FF5722, #E64A19);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .action-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .install-banner {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .install-btn {
+            background: white;
+            color: #2196F3;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <h1>🍽️ Restaurant POS</h1>
+    </div>
+    
+    <div class="content">
+        <div class="install-banner" id="installBanner">
+            <p>Install this app for better experience</p>
+            <button class="install-btn" onclick="installApp()">Install App</button>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Select Table</div>
+            <div class="table-grid" id="tableGrid">
+                <!-- Tables will be added by JavaScript -->
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Menu</div>
+            <div class="menu-grid" id="menuGrid">
+                <!-- Menu items will be added by JavaScript -->
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Current Order - Table: <span id="currentTable">--</span></div>
+            <div id="cartItems">
+                <div style="text-align: center; color: #666; padding: 20px;">
+                    No items added yet
+                </div>
+            </div>
+            <div class="cart-total">
+                Total: $<span id="totalAmount">0.00</span>
+            </div>
+            <button class="action-btn" onclick="submitOrder()" id="submitBtn" disabled>
+                📤 Submit Order to Kitchen
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAm4kmS5xGh9odB_zPdFBgkPf_hfGRp6_eusqgYTfFIiXwQAiYA_D-ifDNuAesCBlW/exec'; // You'll update this later
+        
+        // App State
+        let currentTable = null;
+        let cart = [];
+        
+        // Menu Items
+        const menuItems = [
+            { id: 1, name: 'Classic Burger', price: 12.99, category: 'Main' },
+            { id: 2, name: 'Margherita Pizza', price: 14.99, category: 'Main' },
+            { id: 3, name: 'Caesar Salad', price: 8.99, category: 'Starter' },
+            { id: 4, name: 'Garlic Bread', price: 5.99, category: 'Starter' },
+            { id: 5, name: 'Coca Cola', price: 2.99, category: 'Drink' },
+            { id: 6, name: 'Coffee', price: 3.99, category: 'Drink' },
+            { id: 7, name: 'Chocolate Cake', price: 6.99, category: 'Dessert' },
+            { id: 8, name: 'Ice Cream', price: 4.99, category: 'Dessert' }
+        ];
+        
+        // Initialize App
+        function initApp() {
+            createTableButtons();
+            createMenuItems();
+            showInstallPrompt();
+        }
+        
+        // Create Table Buttons
+        function createTableButtons() {
+            const tableGrid = document.getElementById('tableGrid');
+            tableGrid.innerHTML = '';
+            
+            for (let i = 1; i <= 9; i++) {
+                const tableBtn = document.createElement('button');
+                tableBtn.className = 'table-btn';
+                tableBtn.textContent = `Table ${i}`;
+                tableBtn.onclick = () => selectTable(i);
+                tableGrid.appendChild(tableBtn);
+            }
+        }
+        
+        // Create Menu Items
+        function createMenuItems() {
+            const menuGrid = document.getElementById('menuGrid');
+            menuGrid.innerHTML = '';
+            
+            menuItems.forEach(item => {
+                const menuItem = document.createElement('div');
+                menuItem.className = 'menu-item';
+                menuItem.onclick = () => addToCart(item);
+                menuItem.innerHTML = `
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-price">$${item.price}</div>
+                `;
+                menuGrid.appendChild(menuItem);
+            });
+        }
+        
+        // Select Table
+        function selectTable(tableNumber) {
+            currentTable = tableNumber;
+            
+            // Update UI
+            document.getElementById('currentTable').textContent = tableNumber;
+            
+            // Update table buttons
+            document.querySelectorAll('.table-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Enable submit button if cart has items
+            updateSubmitButton();
+        }
+        
+        // Add to Cart
+        function addToCart(item) {
+            if (!currentTable) {
+                alert('Please select a table first!');
+                return;
+            }
+            
+            cart.push(item);
+            updateCartDisplay();
+            updateSubmitButton();
+        }
+        
+        // Update Cart Display
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cartItems');
+            const totalAmount = document.getElementById('totalAmount');
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">No items added yet</div>';
+                totalAmount.textContent = '0.00';
+                return;
+            }
+            
+            let html = '';
+            let total = 0;
+            
+            cart.forEach((item, index) => {
+                total += item.price;
+                html += `
+                    <div class="cart-item">
+                        <div>
+                            <strong>${item.name}</strong>
+                            <div style="font-size: 12px; color: #666;">${item.category}</div>
+                        </div>
+                        <div>
+                            <strong>$${item.price.toFixed(2)}</strong>
+                            <button onclick="removeFromCart(${index})" style="margin-left: 10px; background: #ff4444; color: white; border: none; border-radius: 5px; padding: 2px 8px; font-size: 12px;">×</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            cartItems.innerHTML = html;
+            totalAmount.textContent = total.toFixed(2);
+        }
+        
+        // Remove from Cart
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartDisplay();
+            updateSubmitButton();
+        }
+        
+        // Update Submit Button
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = !currentTable || cart.length === 0;
+        }
+        
+        // Submit Order
+        async function submitOrder() {
+            if (!currentTable || cart.length === 0) {
+                alert('Please select a table and add items!');
+                return;
+            }
+            
+            const orderData = {
+                tableNumber: currentTable,
+                items: cart.map(item => `${item.name} - $${item.price}`),
+                total: cart.reduce((sum, item) => sum + item.price, 0),
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                // For demo - you'll update SCRIPT_URL later
+                if (SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbxAm4kmS5xGh9odB_zPdFBgkPf_hfGRp6_eusqgYTfFIiXwQAiYA_D-ifDNuAesCBlW/exec')) {
+                    // Demo mode - just show success
+                    alert('✅ Order submitted successfully!\n\nTable: ' + currentTable + '\nTotal: $' + orderData.total.toFixed(2));
+                } else {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(orderData)
+                    });
+                    
+                    if (response.ok) {
+                        alert('✅ Order submitted to kitchen!');
+                    } else {
+                        throw new Error('Server error');
+                    }
+                }
+                
+                // Reset order
+                cart = [];
+                currentTable = null;
+                document.querySelectorAll('.table-btn').forEach(btn => btn.classList.remove('active'));
+                updateCartDisplay();
+                updateSubmitButton();
+                document.getElementById('currentTable').textContent = '--';
+                
+            } catch (error) {
+                alert('❌ Error submitting order. Please try again.');
+                console.error('Order submission error:', error);
+            }
+        }
+        
+        // PWA Installation
+        let deferredPrompt;
+        
+        function showInstallPrompt() {
+            // Check if app is already installed
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                return;
+            }
+            
+            // Show install banner for mobile devices
+            if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
+                const installBanner = document.getElementById('installBanner');
+                installBanner.style.display = 'block';
+            }
+        }
+        
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('installBanner').style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+        
+        // Listen for install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBanner').style.display = 'block';
+        });
+        
+        // Initialize app when page loads
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
